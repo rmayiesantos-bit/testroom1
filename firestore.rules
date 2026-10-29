@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Only you can read/write this (via the Firebase console). Holds the teacher sign-up code.
+    match /config/{d} { allow read, write: if false; }
+
+    // New teacher accounts need the sign-up code; the page removes it right after creating the account.
+    match /tacct/{u} {
+      allow read: if true;
+      allow create: if request.resource.data.tc == get(/databases/$(database)/documents/config/teacher).data.code;
+      allow update, delete: if true;
+    }
+
+    match /players/{u} { allow read, write: if true; }
+    match /roster/{u}  { allow read, write: if true; }
+    match /awards/{a}  { allow read, write: if true; }
+  }
+}
